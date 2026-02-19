@@ -15,6 +15,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         const element = document.querySelector(href);
         if (element) {
             element.scrollIntoView({ behavior: 'smooth' });
+            try { history.pushState(null, '', href); } catch (err) { /* ignore */ }
         }
     });
 });
@@ -188,6 +189,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Log initialization
     console.log('Portfolio initialized successfully!');
+});
+
+// Fix for back/forward cache and browser back behavior: ensure page becomes visible
+window.addEventListener('pageshow', (event) => {
+    // If page was restored from bfcache (persisted=true) it may keep old inline styles
+    if (event.persisted) {
+        // Temporarily disable transition, force visible, then re-enable transition
+        document.body.style.transition = 'none';
+        document.body.style.opacity = '1';
+        setTimeout(() => { document.body.style.transition = 'opacity 320ms ease'; }, 50);
+    } else {
+        // Normal navigation - ensure visible
+        document.body.style.opacity = '1';
+    }
 });
 
 /**
